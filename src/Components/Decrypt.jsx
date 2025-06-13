@@ -53,7 +53,7 @@ function Decrypt() {
         <Commom
           type="submit"
           title="Decrypt Text"
-          icon={<i className="fa fa-lock" aria-hidden="true"></i>}
+          icon={<i className="fa fa-unlock" aria-hidden="true"></i>}
         />
       </div>
       {msgToShow && (

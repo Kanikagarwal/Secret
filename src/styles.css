@@ -10,9 +10,13 @@ html, body, #root {
 }
 
 body {
-  background-color: rgb(57, 57, 57);
+  background: url("/Question mark on white background_ vector_.jpeg") no-repeat center center;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: "Montserrat", sans-serif;
+  height: 100vh; /* ensure body takes full viewport height */
+  margin: 0; /* remove default margin */
 }
+
