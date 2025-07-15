@@ -1,38 +1,41 @@
-import React, { useState, useRef,useContext } from "react";
+import React, { useState, useRef, useContext } from "react";
 import styled from "styled-components";
 import Commom from "./Commom";
-import emojiMap from "./EmojiMap";
+import { emojiMap } from "./EmojiMap";
 import { EncryptionContext } from "../EncryptContext";
-
+import { encryptText } from "../utils/CryptoUtils.js";
+import { base64ToEmoji } from "../utils/EmojiConverter.js"
 
 function Encrypt() {
   const [encryptedEmoji, setEncryptedEmoji] = useState("");
   const emojiRef = useRef(null);
-  const {setEncryptionData} = useContext(EncryptionContext);
+  const { setEncryptionData } = useContext(EncryptionContext);
 
   function handleCopy() {
     if (emojiRef.current) {
       navigator.clipboard
         .writeText(emojiRef.current.textContent)
-        .then(function () {
-          document.querySelector(".copy").classList.replace("fa-clone","fa-check")
+        .then(() => {
+          document
+            .querySelector(".copy")
+            .classList.replace("fa-clone", "fa-check");
         })
         .catch((e) => console.log(e));
     }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    const target = e.target;
-    const msg = target.msg.value;
-    const password = target.password.value;
+    const msg = e.target.msg.value;
+    const password = e.target.password.value;
 
-    const arr = msg.split("");
-    let encryptedEmojiStr = "";
-
-    for (let i = 0; i < arr.length; i++) {
-      encryptedEmojiStr += emojiMap[arr[i]] || "�";
+    if (!msg || !password) {
+      alert("Both message and password are required.");
+      return;
     }
+
+    const encryptedBase64 = await encryptText(msg, password);
+    const encryptedEmojiStr = base64ToEmoji(encryptedBase64);
 
     const obj = {
       msg,
@@ -40,28 +43,17 @@ function Encrypt() {
       encryptedEmoji: encryptedEmojiStr,
     };
 
-    setEncryptedEmoji(obj.encryptedEmoji);
+    setEncryptedEmoji(encryptedEmojiStr);
     setEncryptionData(obj);
-    console.log(obj);
   }
 
   return (
     <Wrapper onSubmit={handleSubmit}>
       <Label htmlFor="msg">Type a message</Label>
-      <Input
-        type="text"
-        name="msg"
-        id="msg"
-        placeholder="Type your message here..."
-      />
+      <Input type="text" name="msg" id="msg" placeholder="Type your message here..." />
 
       <Label htmlFor="password">Password</Label>
-      <Input
-        type="password"
-        name="password"
-        id="password"
-        placeholder="Password"
-      />
+      <Input type="password" name="password" id="password" placeholder="Password" />
 
       <div className="btn">
         <Commom

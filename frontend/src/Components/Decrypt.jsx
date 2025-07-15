@@ -1,44 +1,80 @@
 import React, { useState, useRef, useContext } from "react";
 import styled from "styled-components";
 import Commom from "./Commom";
-import emojiMap from "./EmojiMap";
 import { EncryptionContext } from "../EncryptContext";
+import { decryptText } from "../utils/CryptoUtils.js";
+import { emojiToBase64 } from "../utils/EmojiConverter.js";
+import GraphemeSplitter from "grapheme-splitter";
 
 function Decrypt() {
-    const msgRef = useRef(null);
-    const [msgToShow,setMsgToShow] = useState("");
-    function handleCopy() {
-        if(msgRef.current){
-            navigator.clipboard.writeText(msgRef.current.textContent)
-            .then(function () {
-              document.querySelector(".copy").classList.replace("fa-clone","fa-check")
-            })
-            .catch((e) => console.log(e));
-        }   
-    }
-    const {encryptionData} = useContext(EncryptionContext);
-    console.log(encryptionData);
-    function handleDecryption(e){
-        e.preventDefault();
-        const target = e.target;
-        const msg = target.msg.value;
-        const password = target.password.value;
-        if(password==encryptionData.password && msg==encryptionData.encryptedEmoji){
-            setMsgToShow(encryptionData.msg)
-        }
+  const msgRef = useRef(null);
+  const [msgToShow, setMsgToShow] = useState("");
+  const { encryptionData } = useContext(EncryptionContext);
 
-        else{
-            alert("Either password or Encrypted text is wrong")
-        }
+  function handleCopy() {
+    if (msgRef.current) {
+      navigator.clipboard
+        .writeText(msgRef.current.textContent)
+        .then(() => {
+          document
+            .querySelector(".copy")
+            .classList.replace("fa-clone", "fa-check");
+        })
+        .catch((e) => console.log(e));
     }
+  }
+
+  async function handleDecryption(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const emojiStr = formData.get("msg")?.trim();
+    const password = formData.get("password")?.trim();
+
+    if (!emojiStr || !password) {
+      alert("Both encrypted emoji and password are required.");
+      return;
+    }
+
+    try {
+      // Use GraphemeSplitter here to split emojis correctly
+      const splitter = new GraphemeSplitter();
+      const graphemes = splitter.splitGraphemes(emojiStr);
+      
+      // Convert emoji array back to base64 string
+      const base64 = graphemes.map(g => emojiToBase64(g)).join("");
+
+      console.log("Emoji input:", emojiStr);
+      console.log("Graphemes array:", graphemes);
+      console.log("Base64 string after conversion:", base64);
+      console.log("Password:", password);
+
+      const decrypted = await decryptText(base64, password);
+      console.log(decrypted);
+      
+      if (!decrypted) {
+        alert("❌ Decryption failed: Incorrect password or corrupted data.");
+        setMsgToShow("");
+        return;
+      }
+
+      setMsgToShow(decrypted);
+    } catch (error) {
+      console.error("Decryption error:", error);
+      alert("❌ Decryption failed: incorrect password or invalid input.");
+      setMsgToShow("");
+    }
+  }
+
   return (
-     <Wrapper onSubmit={handleDecryption}>
-      <Label htmlFor="msg">Type encrypted message</Label>
+    <Wrapper onSubmit={handleDecryption}>
+      <Label htmlFor="msg">Paste Encrypted Emoji Text</Label>
       <Input
         type="text"
         name="msg"
         id="msg"
-        placeholder="Type encrypted message here..."
+        placeholder="🔐 Encrypted emoji here..."
+        spellCheck="false"
+        autoComplete="off"
       />
 
       <Label htmlFor="password">Password</Label>
@@ -47,6 +83,7 @@ function Decrypt() {
         name="password"
         id="password"
         placeholder="Password"
+        autoComplete="off"
       />
 
       <div className="btn">
@@ -56,6 +93,7 @@ function Decrypt() {
           icon={<i className="fa fa-unlock" aria-hidden="true"></i>}
         />
       </div>
+
       {msgToShow && (
         <div className="emojiContainer">
           <address className="encryptedShow" ref={msgRef}>
@@ -66,16 +104,16 @@ function Decrypt() {
           </CopyButton>
         </div>
       )}
-     
     </Wrapper>
-  )
+  );
 }
 
-export default Decrypt
+export default Decrypt;
+
 const Wrapper = styled.form`
   width: 100%;
-  max-width: 480px;  /* max width for bigger screens */
-  margin: 0 auto; /* center horizontally */
+  max-width: 480px;
+  margin: 0 auto;
   padding: 12px;
 
   .btn {
@@ -94,7 +132,7 @@ const Wrapper = styled.form`
   .encryptedShow {
     background-color: #2f2f2f;
     width: 100%;
-    font-size: 1.1rem; /* scalable font size */
+    font-size: 1.1rem;
     text-align: center;
     border: 1px solid white;
     max-height: 10vh;
@@ -102,7 +140,7 @@ const Wrapper = styled.form`
     align-items: center;
     justify-content: center;
     overflow-y: auto;
-    padding: 8px 40px 8px 8px; /* space for button */
+    padding: 8px 40px 8px 8px;
     border-radius: 4px;
     white-space: pre-wrap;
     word-break: break-word;
