@@ -1,6 +1,24 @@
 // cryptoUtils.js
-const toBase64 = buffer => btoa(String.fromCharCode(...new Uint8Array(buffer)));
-const fromBase64 = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+// cryptoUtils.js
+
+export function toBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
+export function fromBase64(base64) {
+  const binary = window.atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 
 export async function encryptText(text, password) {
   const enc = new TextEncoder();
