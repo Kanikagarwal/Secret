@@ -1,24 +1,21 @@
 // cryptoUtils.js
-// cryptoUtils.js
-
 export function toBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
+  for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
-  return window.btoa(binary);
+  return btoa(binary); // safe for any byte sequence
 }
 
 export function fromBase64(base64) {
-  const binary = window.atob(base64);
+  const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return bytes;
+  return bytes; // returns Uint8Array
 }
-
 
 export async function encryptText(text, password) {
   const enc = new TextEncoder();
@@ -26,7 +23,11 @@ export async function encryptText(text, password) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
 
   const keyMaterial = await crypto.subtle.importKey(
-    "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
   );
 
   const key = await crypto.subtle.deriveKey(
@@ -34,7 +35,7 @@ export async function encryptText(text, password) {
       name: "PBKDF2",
       salt,
       iterations: 100000,
-      hash: "SHA-256"
+      hash: "SHA-256",
     },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
@@ -48,34 +49,33 @@ export async function encryptText(text, password) {
     enc.encode(text)
   );
 
-  const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+  // Combine salt + iv + encrypted into one buffer
+  const encryptedBytes = new Uint8Array(encrypted);
+  const combined = new Uint8Array(salt.length + iv.length + encryptedBytes.length);
   combined.set(salt);
   combined.set(iv, salt.length);
-  combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+  combined.set(encryptedBytes, salt.length + iv.length);
 
   return toBase64(combined);
 }
 
 export async function decryptText(base64, password) {
-  const data = fromBase64(base64);
-  const salt = data.slice(0, 16);
-  const iv = data.slice(16, 28);
-  const ciphertext = data.slice(28);
-  console.log(data);
-  
-  console.log("Total data length:", data.length);
-console.log("Salt length:", salt.length);
-console.log("IV length:", iv.length);
-console.log("Ciphertext length:", ciphertext.length);
+  const combined = fromBase64(base64); // Uint8Array
+  const salt = combined.slice(0, 16);
+  const iv = combined.slice(16, 28);
+  const ciphertext = combined.slice(28);
 
-if (ciphertext.length === 0) {
-  throw new Error("Ciphertext is empty. Invalid encrypted data.");
-}
-
+  if (ciphertext.length === 0) {
+    throw new Error("❌ Ciphertext is empty or corrupt.");
+  }
 
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
-    "raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
   );
 
   const key = await crypto.subtle.deriveKey(
@@ -83,7 +83,7 @@ if (ciphertext.length === 0) {
       name: "PBKDF2",
       salt,
       iterations: 100000,
-      hash: "SHA-256"
+      hash: "SHA-256",
     },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
@@ -91,12 +91,15 @@ if (ciphertext.length === 0) {
     ["decrypt"]
   );
 
-  const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
-    key,
-    ciphertext
-  );
-console.log(decrypted);
-
-  return new TextDecoder().decode(decrypted);
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv },
+      key,
+      ciphertext
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch (error) {
+    console.error("❌ Decryption failed:", error);
+    throw new Error("Incorrect password or invalid data.");
+  }
 }
