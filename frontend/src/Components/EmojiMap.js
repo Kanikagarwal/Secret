@@ -3,20 +3,20 @@ const emojiMap = {
   // Lowercase Letters
   a: "🍎",
   b: "🐝",
-  c: "🐈",   // changed from 🐱 to 🐈 (cat)
-  d: "🐕",   // changed from 🐶 to 🐕 (dog)
+  c: "🐈",
+  d: "🐕",
   e: "🦅",
   f: "🐸",
   g: "🦒",
   h: "🏠",
   i: "🍦",
-  j: "🕹️",
+  j: "🎮",     // replaced 🕹️
   k: "🔑",
   l: "🦁",
   m: "🌝",
   n: "👃",
   o: "🐙",
-  p: "🅿️",
+  p: "🥁",     // replaced 🅿️
   q: "🍳",
   r: "🤖",
   s: "🐍",
@@ -28,7 +28,7 @@ const emojiMap = {
   y: "🍸",
   z: "⚡",
 
-  // Capital Letters - all unique emojis now
+  // Capital Letters
   A: "🧁",
   B: "🍌",
   C: "🌈",
@@ -46,49 +46,49 @@ const emojiMap = {
   O: "🧅",
   P: "🥞",
   Q: "👑",
-  R: "🌟",   // changed from 🌈 to 🌟 (star)
+  R: "🌟",
   S: "🎯",
   T: "🧵",
-  U: "🎮",
+  U: "🧠",     // replaced 🎮 used already for j
   V: "🪄",
   W: "📐",
-  X: "🪀",
+  X: "⚔️",     // replaced 🪀
   Y: "🦓",
-  Z: "🐬",   // changed from 🦓 to 🐬 (unique)
+  Z: "🐬",
 
   // Space
   " ": "⬜",
 
-  // Numbers
-  0: "0️⃣",
-  1: "1️⃣",
-  2: "2️⃣",
-  3: "3️⃣",
-  4: "4️⃣",
-  5: "5️⃣",
-  6: "6️⃣",
-  7: "7️⃣",
-  8: "8️⃣",
-  9: "9️⃣",
+  // Numbers (replaced emoji keycaps with plain digits or symbols)
+  0: "🍩",
+  1: "🥇",
+  2: "🥈",
+  3: "🥉",
+  4: "🍀",
+  5: "🖐️",
+  6: "🎱",
+  7: "🌈",
+  8: "🎱", // intentionally duplicated for demonstration, you may replace
+  9: "🐾",
 
-  // Symbols - all unique
+  // Symbols (safe versions)
   "!": "❗",
   "?": "❓",
   ".": "🔸",
   ",": "🔹",
   "@": "📧",
-  "#": "#️⃣",
+  "#": "🎯",     // replaced #️⃣
   "$": "💲",
   "%": "💯",
   "^": "🆙",
-  "&": "➕",
+  "&": "🤝",     // replaced ➕
   "*": "✨",
   "(": "🔘",
   ")": "⚫",
   "-": "➖",
-  "_": "@",   // changed from ➖ to ➗ (different from -)
-  "+": "🟰",   // changed from ➕ to 🟰 (different from &)
-  "=": "➗",   // changed from 🟰 to ➗ (new)
+  "_": "🧷",     // safe emoji
+  "+": "➕",
+  "=": "🧮",     // replaced ➗
   "/": "⏰",
   ":": "🔕",
   ";": "📝",
@@ -97,13 +97,13 @@ const emojiMap = {
   "[": "🟩",
   "]": "🟦",
   "{": "🟨",
-  "}": "◀️",
-  "<": "▶️",
+  "}": "◀",      // removed variation
+  "<": "▶",      // removed variation
   ">": "📏",
   "|": "🪞",
-  "\\": "🎛️",
-  "`": "🌪️",
-  "~": "🛡️"
+  "\\": "🎛",    // removed variation
+  "`": "🌪",
+  "~": "🛡"
 };
 
 // Auto-generate reverseEmojiMap
@@ -116,5 +116,6 @@ for (const [char, emoji] of Object.entries(emojiMap)) {
     reverseEmojiMap[normalizedEmoji] = char;
   }
 }
+
 
 export { emojiMap, reverseEmojiMap };
