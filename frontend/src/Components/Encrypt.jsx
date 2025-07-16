@@ -68,7 +68,7 @@ function Encrypt() {
           <address className="encryptedShow" ref={emojiRef}>
             {encryptedEmoji}
           </address>
-          <CopyButton onClick={handleCopy} title="Copy to clipboard">
+          <CopyButton type="button" onClick={handleCopy} title="Copy to clipboard">
             <i className="copy fa fa-clone" aria-hidden="true"></i>
           </CopyButton>
         </div>

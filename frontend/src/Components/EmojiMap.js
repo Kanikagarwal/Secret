@@ -109,10 +109,11 @@ const emojiMap = {
 // Auto-generate reverseEmojiMap
 const reverseEmojiMap = {};
 for (const [char, emoji] of Object.entries(emojiMap)) {
-  if (reverseEmojiMap[emoji]) {
-    console.warn(`Duplicate emoji for ${char}: ${emoji}`);
+  const normalizedEmoji = emoji.normalize("NFC");
+  if (reverseEmojiMap[normalizedEmoji]) {
+    console.warn(`Duplicate emoji for ${char}: ${normalizedEmoji}`);
   } else {
-    reverseEmojiMap[emoji] = char;
+    reverseEmojiMap[normalizedEmoji] = char;
   }
 }
 
